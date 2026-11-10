@@ -17,7 +17,7 @@
   `https://youtu.be/TU_VIDEO_EXPLICATIVO`  
   *(Enlace de YouTube como no listado o Google Drive con acceso de lectura público mediante enlace)*
 - **Identificador del Commit Final:**  
-  `b90c0a9` (o el commit final generado al momento del push en GitHub)
+  `3d1855c`
 
 > **Verificación previa:** Se recomienda abrir tanto el enlace del repositorio como el del video en una **ventana privada de incógnito** antes de enviar la entrega para confirmar que ambos recursos cuentan con permisos de lectura pública.
 
