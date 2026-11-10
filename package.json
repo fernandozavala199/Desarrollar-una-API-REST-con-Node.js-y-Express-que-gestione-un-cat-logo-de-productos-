@@ -1,0 +1,31 @@
+{
+  "name": "api-catalogo-productos",
+  "version": "1.0.0",
+  "description": "API REST con Node.js y Express para catálogo de productos y favoritos personales con PostgreSQL y JWT",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:init": "node database/init-db.js",
+    "test": "node test/run-tests.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "postgresql",
+    "jwt",
+    "api-rest",
+    "roles",
+    "favoritos"
+  ],
+  "author": "Zavala & Cataña",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.18.0"
+  }
+}
