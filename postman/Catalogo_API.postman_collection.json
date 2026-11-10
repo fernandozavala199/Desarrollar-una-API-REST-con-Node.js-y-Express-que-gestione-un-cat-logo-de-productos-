@@ -1,0 +1,895 @@
+{
+  "info": {
+    "_postman_id": "catalogo-api-collection-2026",
+    "name": "API Catálogo de Productos y Favoritos - Zavala & Cataña",
+    "description": "Colección completa de pruebas automatizadas para la API REST con Express, PostgreSQL, JWT y RBAC.\nIncluye validaciones de códigos de estado, estructura de respuestas, control de acceso por roles, persistencia y aislamiento de favoritos entre usuarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Autenticación y Usuarios",
+      "item": [
+        {
+          "name": "1.1 Registro Usuario A (201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario A\",\n  \"correo\": \"{{userAEmail}}\",\n  \"password\": \"{{userAPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Respuesta contiene usuario con rol \"usuario\" sin password', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('usuario');",
+                  "    pm.expect(jsonData.usuario).to.have.property('id');",
+                  "    pm.expect(jsonData.usuario.rol).to.eql('usuario');",
+                  "    pm.expect(jsonData.usuario).to.not.have.property('password');",
+                  "    pm.expect(jsonData.usuario).to.not.have.property('password_hash');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 Registro Usuario A - Rechazo Correo Duplicado (409 Conflict)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario A Clon\",\n  \"correo\": \"{{userAEmail}}\",\n  \"password\": \"OtraClave123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 409 Conflict ante correo duplicado', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Mensaje de error claro', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.3 Registro - Rechazo Campos Vacíos / Inválidos (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"correo\": \"sin_nombre@ejemplo.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 400 Bad Request por campo vacío', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.4 Registro Usuario B (201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario B\",\n  \"correo\": \"{{userBEmail}}\",\n  \"password\": \"{{userBPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Usuario B registrado con rol \"usuario\"', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.usuario.rol).to.eql('usuario');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.5 Login Usuario A - Exitoso (200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{userAEmail}}\",\n  \"password\": \"{{userAPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Devuelve token JWT y se almacena en el entorno', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.environment.set('userAToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.6 Login Usuario B - Exitoso (200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{userBEmail}}\",\n  \"password\": \"{{userBPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Devuelve token JWT para Usuario B y se almacena', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.environment.set('userBToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.7 Login Administrador - Exitoso (200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Token emitido y rol es admin', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData.usuario.rol).to.eql('admin');",
+                  "    pm.environment.set('adminToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.8 Login Credenciales Incorrectas (401 Unauthorized)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{adminEmail}}\",\n  \"password\": \"PasswordCompletamenteErronea999\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test('Mensaje de error claro de credenciales inválidas', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Catálogo y CRUD de Productos",
+      "item": [
+        {
+          "name": "2.1 Listar Productos - Público (200 OK)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK sin necesidad de token', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Contiene al menos 5 productos de ejemplo', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.productos).to.be.an('array');",
+                  "    pm.expect(jsonData.productos.length).to.be.at.least(5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Filtrar Productos por Categoría - Público (200 OK)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/productos?categoria=Accesorios",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos"],
+              "query": [{ "key": "categoria", "value": "Accesorios" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Todos los productos retornados pertenecen a Accesorios', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    jsonData.productos.forEach(p => {",
+                  "        pm.expect(p.categoria.toLowerCase()).to.eql('accesorios');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 Consultar Producto por ID - Público (200 OK)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/productos/1", "host": ["{{baseUrl}}"], "path": ["productos", "1"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Producto tiene id, nombre, precio > 0', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.producto.id).to.eql(1);",
+                  "    pm.expect(jsonData.producto.precio).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 Consultar Producto Inexistente (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/productos/99999", "host": ["{{baseUrl}}"], "path": ["productos", "99999"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('Mensaje de error claro', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.5 Crear Producto como Administrador (201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tablet Gráfica Profesional\",\n  \"descripcion\": \"Tableta digitalizadora de 12 pulgadas con lápiz óptico sin batería y 8192 niveles de presión\",\n  \"categoria\": \"Diseño\",\n  \"precio\": 249.99\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Producto creado y se guarda su ID', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.producto).to.have.property('id');",
+                  "    pm.environment.set('createdProductId', jsonData.producto.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.6 Crear Producto - Rechazo Precio Inválido (422 Unprocessable Entity)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto Precio Cero\",\n  \"descripcion\": \"Intento con precio menor o igual a cero\",\n  \"categoria\": \"Pruebas\",\n  \"precio\": 0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 422 por precio menor o igual a 0', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.7 Crear Producto - Rechazo Campos Vacíos (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"descripcion\": \"\",\n  \"categoria\": \"\",\n  \"precio\": 50\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 400 Bad Request por campos vacíos', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.8 Actualizar Producto como Administrador (200 OK)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tablet Gráfica Profesional V2\",\n  \"descripcion\": \"Versión actualizada con conectividad Bluetooth y pantalla laminada\",\n  \"categoria\": \"Diseño\",\n  \"precio\": 279.99\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos/{{createdProductId}}", "host": ["{{baseUrl}}"], "path": ["productos", "{{createdProductId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Valores actualizados correctamente', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.producto.nombre).to.eql('Tablet Gráfica Profesional V2');",
+                  "    pm.expect(jsonData.producto.precio).to.eql(279.99);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.9 Eliminar Producto como Administrador (200 OK)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/productos/{{createdProductId}}", "host": ["{{baseUrl}}"], "path": ["productos", "{{createdProductId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Seguridad, Tokens y Control de Roles",
+      "item": [
+        {
+          "name": "3.1 Crear Producto Sin Token (401 Unauthorized)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Intento Sin Token\",\n  \"descripcion\": \"Sin cabecera Authorization\",\n  \"categoria\": \"Pruebas\",\n  \"precio\": 100\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 Crear Producto Con Token Vencido (401 Unauthorized)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{expiredToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Intento Con Token Expirado\",\n  \"descripcion\": \"Token con expiración pasada\",\n  \"categoria\": \"Pruebas\",\n  \"precio\": 100\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 401 Unauthorized ante token expirado o firma inválida', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.3 Modificar Catálogo con Rol Usuario Normal (403 Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto Intentado Por Usuario Normal\",\n  \"descripcion\": \"Debe ser rechazado porque no es admin\",\n  \"categoria\": \"Hacking\",\n  \"precio\": 99.99\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 403 Forbidden', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test('Mensaje de error indica falta de rol de administrador', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.error).to.include('admin');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Favoritos y Aislamiento entre Usuarios",
+      "item": [
+        {
+          "name": "4.1 Usuario A - Agregar Producto a Favoritos (201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Respuesta confirma favorito creado', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.favorito.producto_id).to.eql(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Usuario A - Rechazo Favorito Duplicado (409 Conflict)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 409 Conflict ante favorito duplicado', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 Usuario A - Rechazo Favorito Producto Inexistente (404 Not Found)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 99999\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 404 Not Found por producto inexistente', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.4 Usuario A - Listar Sus Favoritos (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Usuario A tiene al menos 1 favorito (producto 1)', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.favoritos).to.be.an('array');",
+                  "    pm.expect(jsonData.favoritos.length).to.be.at.least(1);",
+                  "    const p1 = jsonData.favoritos.find(f => f.producto_id === 1);",
+                  "    pm.expect(p1).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.5 Usuario B - Comprobar Aislamiento: B no ve los favoritos de A (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userBToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Aislamiento: Usuario B NO tiene los favoritos de Usuario A', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.favoritos).to.be.an('array');",
+                  "    pm.expect(jsonData.total).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.6 Usuario B - Intentar Quitar el Favorito de Usuario A (404 Not Found)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userBToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos/1", "host": ["{{baseUrl}}"], "path": ["favoritos", "1"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 404 Not Found: B no puede borrar el favorito de A', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.7 Usuario A - Comprobar que su Favorito Permanece Intacto (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('El favorito del producto 1 de Usuario A sigue existiendo', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const p1 = jsonData.favoritos.find(f => f.producto_id === 1);",
+                  "    pm.expect(p1).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.8 Usuario A - Quitar Favorito Exitosamente (200 OK)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos/1", "host": ["{{baseUrl}}"], "path": ["favoritos", "1"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.9 Usuario A - Comprobar Lista de Favoritos Vacía (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{userAToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favoritos", "host": ["{{baseUrl}}"], "path": ["favoritos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Lista de favoritos ahora está vacía', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.total).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Persistencia y Reinicio del Servidor",
+      "item": [
+        {
+          "name": "5.1 Comprobar Persistencia de Datos tras Reinicio (200 OK)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Los productos persisten íntegros en la base de datos', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.productos.length).to.be.at.least(5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
