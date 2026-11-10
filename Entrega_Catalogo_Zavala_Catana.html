@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Entrega - API Catálogo Zavala & Cataña</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: #24292e;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #2b6cb0;
+            padding-bottom: 10px;
+            font-size: 24px;
+            margin-top: 0;
+        }
+        h2 {
+            color: #2c5282;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+            font-size: 18px;
+            margin-top: 25px;
+        }
+        h3 {
+            color: #2b6cb0;
+            font-size: 15px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+        p, li {
+            font-size: 13px;
+        }
+        .header-box {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .header-box p {
+            margin: 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 7px 9px;
+            text-align: left;
+        }
+        th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        .badge-pass {
+            background-color: #c6f6d5;
+            color: #22543d;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            background-color: #edf2f7;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #805ad5;
+        }
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+        .checklist li:before {
+            content: "✓ ";
+            color: #38a169;
+            font-weight: bold;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .print-btn {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print" style="text-align: right;">
+        <button class="print-btn" onclick="window.print()">🖨️ Exportar / Imprimir a PDF</button>
+    </div>
+
+    <h1>Informe de Entrega: API REST Catálogo de Productos y Favoritos Personales</h1>
+    
+    <div class="header-box">
+        <p><strong>Archivo de Entrega:</strong> <code>Entrega_Catalogo_Zavala_Catana.pdf</code></p>
+        <p><strong>Integrantes:</strong> Fernando Zavala & Fernando Cataña</p>
+        <p><strong>Fecha de Entrega:</strong> 10 de Noviembre de 2026</p>
+        <p><strong>Tecnologías Principales:</strong> Node.js (v24), Express, PostgreSQL (v18), JWT, Bcrypt, Postman</p>
+    </div>
+
+    <h2>1. Enlaces Obligatorios de la Entrega</h2>
+    <ul>
+        <li><strong>Repositorio Público de GitHub:</strong> <br>
+            <a href="https://github.com/fernandozavala199/Desarrollar-una-API-REST-con-Node.js-y-Express-que-gestione-un-cat-logo-de-productos-" target="_blank"><code>https://github.com/fernandozavala199/Desarrollar-una-API-REST-con-Node.js-y-Express-que-gestione-un-cat-logo-de-productos-</code></a>
+        </li>
+        <li><strong>Enlace al Video Explicativo:</strong> <br>
+            <code>https://youtu.be/TU_VIDEO_EXPLICATIVO</code><br>
+            <em>(Subido a YouTube en modo 'No listado' o a Google Drive con acceso público mediante enlace)</em>
+        </li>
+        <li><strong>Identificador del Commit Final:</strong> <code>b90c0a9</code></li>
+    </ul>
+
+    <h2>2. Resumen de Aportes por Integrante</h2>
+    
+    <h3>Fernando Zavala</h3>
+    <ul>
+        <li><strong>Modelo Relacional DDL:</strong> Diseño del esquema relacional en PostgreSQL (<code>schema.sql</code>), tipos de datos estrictos (<code>NUMERIC(10,2)</code> con <code>CHECK (precio > 0)</code>) y reglas de unicidad en usuarios y favoritos.</li>
+        <li><strong>Integridad Referencial en Cascada:</strong> Configuración de <code>ON DELETE CASCADE</code> en la tabla <code>favoritos</code> para garantizar que al eliminar un producto se limpien automáticamente sus favoritos sin inconsistencias.</li>
+        <li><strong>Acceso a Datos y SQL Parametrizado:</strong> Creación de <code>product.model.js</code> y <code>favorite.model.js</code> usando consultas parametrizadas (<code>$1, $2, ...</code>) con el pool de <code>pg</code> para prevenir inyecciones SQL.</li>
+        <li><strong>Controlador de Catálogo:</strong> Implementación del CRUD de productos, filtrado dinámico por categoría y endpoints públicos/administrativos (<code>product.controller.js</code>).</li>
+        <li><strong>Aislamiento de Favoritos:</strong> Implementación de la lógica en <code>favorite.controller.js</code> obteniendo la identidad del usuario únicamente del token JWT verificado.</li>
+        <li><strong>Documentación:</strong> Redacción del <code>README.md</code> y guías de ejecución del proyecto.</li>
+    </ul>
+
+    <h3>Fernando Cataña</h3>
+    <ul>
+        <li><strong>Arquitectura y Configuración:</strong> Estructura modular de la API en capas (rutas, controladores, middlewares, acceso a datos) en <code>app.js</code> y <code>server.js</code>.</li>
+        <li><strong>Autenticación y Seguridad:</strong> Implementación de registro público (con rol <code>usuario</code> estricto), login y emisión de JWT firmados con expiración (<code>auth.controller.js</code>, <code>user.model.js</code>). Cifrado de contraseñas con <code>bcryptjs</code> (10 rounds).</li>
+        <li><strong>Inicialización Idempotente:</strong> Desarrollo del script <code>database/init-db.js</code> para crear la base de datos, ejecutar DDL, crear el Administrador Inicial seguro y cargar productos de prueba.</li>
+        <li><strong>Middlewares de Autorización y Roles:</strong> Creación de <code>auth.middleware.js</code> (verificación de firma y expiración del JWT, 401) y <code>role.middleware.js</code> (control de roles RBAC, 403).</li>
+        <li><strong>Validaciones y Códigos HTTP:</strong> Implementación de <code>validate.middleware.js</code> distinguiendo entre <code>400 Bad Request</code> (sintaxis/campos faltantes) y <code>422 Unprocessable Entity</code> (semántica de negocio como precio <= 0).</li>
+        <li><strong>Pruebas en Postman y Automatización:</strong> Creación de la colección de Postman, entorno dinámico y la suite <code>test/run-tests.js</code> con 29 pruebas automatizadas (100% aprobadas).</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2>3. Tabla de Pruebas Reproducibles (29 Casos Demostrados)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 3%;">#</th>
+                <th style="width: 25%;">Caso de Prueba</th>
+                <th style="width: 20%;">Ruta y Acceso</th>
+                <th style="width: 25%;">Resultado Esperado</th>
+                <th style="width: 22%;">Resultado Obtenido</th>
+                <th style="width: 5%;">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Registro de Usuario A</td>
+                <td><code>POST /api/auth/registro</code> (Público)</td>
+                <td>201 Created. Rol 'usuario'. No expone password ni hash.</td>
+                <td>201 Created. Usuario creado sin datos sensibles.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Rechazo de correo duplicado</td>
+                <td><code>POST /api/auth/registro</code> (Público)</td>
+                <td>409 Conflict. Mensaje claro.</td>
+                <td>409 Conflict. Rechazo ante duplicidad.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Rechazo campos obligatorios vacíos</td>
+                <td><code>POST /api/auth/registro</code> (Público)</td>
+                <td>400 Bad Request. Indica campo faltante.</td>
+                <td>400 Bad Request. 'nombre' obligatorio.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Registro de Usuario B</td>
+                <td><code>POST /api/auth/registro</code> (Público)</td>
+                <td>201 Created. Rol 'usuario'.</td>
+                <td>201 Created. Usuario B registrado exitosamente.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Login Usuario A</td>
+                <td><code>POST /api/auth/login</code> (Público)</td>
+                <td>200 OK. Devuelve token JWT firmado.</td>
+                <td>200 OK. Token generado y almacenado.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Login Usuario B</td>
+                <td><code>POST /api/auth/login</code> (Público)</td>
+                <td>200 OK. Devuelve token JWT de Usuario B.</td>
+                <td>200 OK. Token emitido y almacenado.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Login Administrador</td>
+                <td><code>POST /api/auth/login</code> (Público)</td>
+                <td>200 OK. Token con rol 'admin'.</td>
+                <td>200 OK. Administrador autenticado con rol admin.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Login credenciales incorrectas</td>
+                <td><code>POST /api/auth/login</code> (Público)</td>
+                <td>401 Unauthorized.</td>
+                <td>401 Unauthorized. Credenciales inválidas.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Consulta catálogo público sin token</td>
+                <td><code>GET /api/productos</code> (Público)</td>
+                <td>200 OK. Muestra >= 5 productos.</td>
+                <td>200 OK. Catálogo con 6 productos devuelto.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td>Filtro de catálogo por categoría</td>
+                <td><code>GET /api/productos?categoria=Accesorios</code></td>
+                <td>200 OK. Solo productos de la categoría.</td>
+                <td>200 OK. Filtro aplicado correctamente.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td>Consultar producto por ID</td>
+                <td><code>GET /api/productos/1</code> (Público)</td>
+                <td>200 OK. Detalle con precio > 0.</td>
+                <td>200 OK. Datos correctos del producto.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td>Consultar producto inexistente</td>
+                <td><code>GET /api/productos/999999</code> (Público)</td>
+                <td>404 Not Found.</td>
+                <td>404 Not Found. ID no encontrado.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td>Modificar catálogo sin token</td>
+                <td><code>POST /api/productos</code> (Sin token)</td>
+                <td>401 Unauthorized.</td>
+                <td>401 Unauthorized. Bloqueo por falta de token.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td>Modificar catálogo con token vencido</td>
+                <td><code>POST /api/productos</code> (Token vencido)</td>
+                <td>401 Unauthorized.</td>
+                <td>401 Unauthorized. Token expirado.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td>Modificar catálogo con rol usuario</td>
+                <td><code>POST /api/productos</code> (Usuario normal)</td>
+                <td>403 Forbidden. Falta rol de admin.</td>
+                <td>403 Forbidden. Acceso prohibido por rol.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>16</td>
+                <td>Rechazo de precio inválido (<= 0)</td>
+                <td><code>POST /api/productos</code> (Admin)</td>
+                <td>422 Unprocessable Entity. Regla de negocio.</td>
+                <td>422 Unprocessable Entity. Precio > 0 requerido.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>17</td>
+                <td>CRUD Admin: Crear producto</td>
+                <td><code>POST /api/productos</code> (Admin)</td>
+                <td>201 Created. Devuelve nuevo producto con ID.</td>
+                <td>201 Created. Producto registrado en base de datos.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>18</td>
+                <td>CRUD Admin: Actualizar producto</td>
+                <td><code>PUT /api/productos/:id</code> (Admin)</td>
+                <td>200 OK. Datos modificados.</td>
+                <td>200 OK. Nombre y precio actualizados.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>19</td>
+                <td>CRUD Admin: Eliminar producto</td>
+                <td><code>DELETE /api/productos/:id</code> (Admin)</td>
+                <td>200 OK. Eliminado de BD y cascada limpia.</td>
+                <td>200 OK. Producto eliminado del catálogo.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>20</td>
+                <td>Agregar a favoritos (Usuario A)</td>
+                <td><code>POST /api/favoritos</code> (Usuario A)</td>
+                <td>201 Created. Relaciona usuario con producto 1.</td>
+                <td>201 Created. Favorito creado con éxito.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>21</td>
+                <td>Rechazo de favorito duplicado</td>
+                <td><code>POST /api/favoritos</code> (Usuario A)</td>
+                <td>409 Conflict. Impide duplicar.</td>
+                <td>409 Conflict. Favorito ya existía.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>22</td>
+                <td>Favorito producto inexistente</td>
+                <td><code>POST /api/favoritos</code> (Usuario A)</td>
+                <td>404 Not Found. Referencia inexistente.</td>
+                <td>404 Not Found. Producto no existe.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>23</td>
+                <td>Listar favoritos de Usuario A</td>
+                <td><code>GET /api/favoritos</code> (Usuario A)</td>
+                <td>200 OK. Muestra producto 1.</td>
+                <td>200 OK. Lista personal devuelta.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>24</td>
+                <td><strong>Aislamiento: Usuario B no ve favoritos de A</strong></td>
+                <td><code>GET /api/favoritos</code> (Usuario B)</td>
+                <td>200 OK. Lista vacía (total: 0).</td>
+                <td>200 OK. B no ve el favorito de A.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>25</td>
+                <td><strong>Aislamiento: B intenta borrar favorito de A</strong></td>
+                <td><code>DELETE /api/favoritos/1</code> (Usuario B)</td>
+                <td>404 Not Found. No pertenece a B.</td>
+                <td>404 Not Found. Intento de borrado bloqueado.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>26</td>
+                <td><strong>Aislamiento: Favorito de A permanece</strong></td>
+                <td><code>GET /api/favoritos</code> (Usuario A)</td>
+                <td>200 OK. Producto 1 sigue existiendo.</td>
+                <td>200 OK. Favorito de A intacto tras ataque de B.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>27</td>
+                <td>Usuario A quita su favorito</td>
+                <td><code>DELETE /api/favoritos/1</code> (Usuario A)</td>
+                <td>200 OK. Eliminado de sus favoritos.</td>
+                <td>200 OK. Favorito borrado correctamente.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>28</td>
+                <td>Lista de Usuario A vacía</td>
+                <td><code>GET /api/favoritos</code> (Usuario A)</td>
+                <td>200 OK. Total: 0.</td>
+                <td>200 OK. Lista vacía confirmada.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+            <tr>
+                <td>29</td>
+                <td><strong>Persistencia tras reinicio</strong></td>
+                <td><code>GET /api/productos</code> (Público)</td>
+                <td>200 OK. Todos los registros persisten en BD.</td>
+                <td>200 OK. Persistencia en PostgreSQL verificada.</td>
+                <td><span class="badge-pass">PASÓ</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2>4. Guión del Video Explicativo (Estructura de 10 a 15 Minutos)</h2>
+    <p>Para cumplir estrictamente con los criterios de evaluación del video técnico con audio claro y pantalla compartida:</p>
+
+    <ul>
+        <li><strong>0:00 - 2:00 | Introducción y Presentación:</strong> Identificación con nombre y apellido de Fernando Zavala y Fernando Cataña. Propósito de la API REST, arquitectura en capas, elección de PostgreSQL y aportes individuales.</li>
+        <li><strong>2:00 - 5:30 | Explicación Técnica de Código:</strong>
+            <ul>
+                <li><em>Fernando Zavala:</em> Recorrido por el CRUD de productos (<code>product.controller.js</code>), consultas parametrizadas contra inyección SQL y clave foránea <code>ON DELETE CASCADE</code> en <code>schema.sql</code>.</li>
+                <li><em>Fernando Cataña:</em> Verificación de firma y expiración del JWT (<code>auth.middleware.js</code>), control de roles RBAC (<code>role.middleware.js</code>) y validación de reglas de negocio con códigos 400 y 422.</li>
+            </ul>
+        </li>
+        <li><strong>5:30 - 8:00 | Seguimiento de una Petición de Extremo a Extremo:</strong> Envío de una petición en Postman (ej. <code>POST /api/favoritos</code>) y seguimiento paso a paso en el código: ruta → middleware de autenticación (extracción de identidad sin confiar en el cliente) → validación → controlador → modelo SQL → PostgreSQL → respuesta JSON 201.</li>
+        <li><strong>8:00 - 12:00 | Demostración de Pruebas en Postman:</strong>
+            <ul>
+                <li>Flujo exitoso de registro y login para usuarios y administrador.</li>
+                <li>Demostración de errores de validación (campos vacíos 400, precio &lt;= 0 422).</li>
+                <li>Rechazo por permisos (usuario normal intentando crear producto 403, token vencido 401).</li>
+                <li><strong>Demostración de Aislamiento:</strong> Usuario A agrega favorito; Usuario B consulta y no lo ve (lista vacía); Usuario B intenta borrarlo y recibe 404; Usuario A vuelve a consultar y su favorito permanece.</li>
+                <li><strong>Persistencia:</strong> Reiniciar Node.js y consultar de nuevo el catálogo demostrando que los datos están intactos en PostgreSQL.</li>
+            </ul>
+        </li>
+        <li><strong>12:00 - 14:00 | Dificultad Encontrada y Solución:</strong> Explicar cómo se resolvió la consistencia referencial de favoritos ante la eliminación de productos mediante <code>ON DELETE CASCADE</code> y cómo ejecutar el proyecto desde una copia limpia con <code>npm install</code> y <code>npm run db:init</code>.</li>
+    </ul>
+
+    <h2>5. Checklist Final de Entrega</h2>
+    <ul class="checklist">
+        <li>Código completo en repositorio público de GitHub sin carpetas temporales ni <code>node_modules</code>.</li>
+        <li>Historial de commits con autoría identificable de ambos integrantes (Fernando Zavala y Fernando Cataña).</li>
+        <li>Variables de entorno de ejemplo en <code>.env.example</code> sin contraseñas ni secretos reales.</li>
+        <li>Esquema DDL de PostgreSQL (<code>database/schema.sql</code>) y datos de prueba (<code>database/seed.sql</code>).</li>
+        <li>Colección de Postman y entorno exportados con pruebas y aserciones automatizadas.</li>
+        <li>Suite de 29 pruebas automatizadas ejecutables con <code>npm test</code> (100% aprobadas).</li>
+        <li>Mismo archivo PDF subido por ambos integrantes (<code>Entrega_Catalogo_Zavala_Catana.pdf</code>).</li>
+    </ul>
+
+</body>
+</html>
