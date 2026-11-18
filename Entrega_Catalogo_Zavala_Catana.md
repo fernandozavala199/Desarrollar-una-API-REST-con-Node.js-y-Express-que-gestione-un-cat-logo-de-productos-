@@ -1,7 +1,7 @@
 # Informe de Entrega: API REST Catálogo de Productos y Favoritos Personales
 
 **Documento:** Entrega_Catalogo_Zavala_Catana.pdf  
-**Fecha de Entrega:** 10 de Noviembre de 2026  
+**Fecha de Entrega:** 21 de noviembre del 2026  
 **Tecnologías:** Node.js, Express, PostgreSQL, JSON Web Tokens (JWT), Postman  
 
 ---
@@ -13,13 +13,10 @@
   2. **Fernando Cataña** (Estudiante 2)
 - **Enlace al Repositorio Público de GitHub:**  
   `https://github.com/fernandozavala199/Desarrollar-una-API-REST-con-Node.js-y-Express-que-gestione-un-cat-logo-de-productos-`
-- **Enlace al Video Explicativo:**  
-  `https://youtu.be/TU_VIDEO_EXPLICATIVO`  
-  *(Enlace de YouTube como no listado o Google Drive con acceso de lectura público mediante enlace)*
 - **Identificador del Commit Final:**  
   `3d1855c`
 
-> **Verificación previa:** Se recomienda abrir tanto el enlace del repositorio como el del video en una **ventana privada de incógnito** antes de enviar la entrega para confirmar que ambos recursos cuentan con permisos de lectura pública.
+> **Verificación previa:** Se recomienda abrir el enlace del repositorio en una **ventana privada de incógnito** antes de enviar la entrega para confirmar que cuenta con permisos de lectura pública.
 
 ---
 
@@ -79,65 +76,4 @@ A continuación se detalla la ejecución de los **29 casos de prueba**, demostra
 | **28** | Verificar lista de Usuario A vacía | `GET /api/favoritos` | Usuario A | `200 OK`. Lista personal queda con `total: 0`. | `200 OK`. Lista de favoritos vacía confirmada. | **PASÓ** |
 | **29** | **Persistencia tras reinicio de Node.js** | `GET /api/productos` | Público | `200 OK`. Todos los registros de la base de datos persisten intactos. | `200 OK`. Catálogo íntegro verificado directamente en PostgreSQL. | **PASÓ** |
 
----
 
-## 4. Guión para la Grabación del Video Explicativo (10 - 15 minutos)
-
-Para cumplir con la pauta y rúbrica de evaluación, se recomienda estructurar la grabación en los siguientes bloques:
-
-### Bloque 1: Presentación y Visión General (0:00 - 2:30)
-- **Cámara y pantalla activa:** Ambos integrantes (Fernando Zavala y Fernando Cataña) se presentan con nombre y apellido.
-- **Propósito:** Explicar el objetivo de la API REST de catálogo y favoritos con autenticación JWT, RBAC y persistencia en PostgreSQL.
-- **Estructura del Proyecto:** Breve recorrido visual por las carpetas (`database`, `src/controllers`, `src/middlewares`, `src/models`, `src/routes`, `postman`, `test`).
-- **Resumen de Aportes:** Cada estudiante menciona brevemente sus módulos desarrollados.
-
-### Bloque 2: Explicación Técnica de Fragmentos de Código (2:30 - 6:00)
-- **Fernando Zavala:**
-  - Explica una operación CRUD en `src/controllers/product.controller.js` y el modelo correspondiente en `src/models/product.model.js`.
-  - Muestra el uso de consultas SQL parametrizadas (`$1, $2, ...`) para prevenir inyecciones SQL.
-  - Explica cómo la clave foránea `ON DELETE CASCADE` en `database/schema.sql` asegura que al borrar un producto, sus favoritos se eliminen automáticamente.
-- **Fernando Cataña:**
-  - Explica la emisión y verificación del JWT en `src/middlewares/auth.middleware.js` (comprobación de firma y expiración con respuesta `401`).
-  - Explica el control de roles en `src/middlewares/role.middleware.js` (bloqueo `403` a usuarios normales en rutas administrativas).
-  - Explica cómo se garantiza el aislamiento en `src/controllers/favorite.controller.js`, obteniendo el `usuario_id` directamente del payload del token y nunca del body del cliente.
-
-### Bloque 3: Seguimiento de una Petición de Extremo a Extremo (6:00 - 8:30)
-- Enviar una petición desde Postman (por ejemplo `POST /api/favoritos` o `POST /api/auth/login`).
-- Seguir el flujo en vivo mostrando el código:
-  1. La petición entra a Express por `src/routes/favorite.routes.js`.
-  2. Pasa por el middleware `authenticateToken`, el cual decodifica el JWT e inyecta `req.user`.
-  3. Pasa por `validateFavoritoBody` comprobando que `productoId` sea un entero positivo.
-  4. Entra al controlador `FavoriteController.add`, valida que el producto exista en catálogo y que no esté duplicado.
-  5. Llama a `FavoriteModel.add` ejecutando la sentencia SQL parametrizada en PostgreSQL.
-  6. Retorna la respuesta JSON con código `201 Created` y los datos asociados.
-
-### Bloque 4: Demostración de las Pruebas en Postman (8:30 - 12:30)
-- Abrir Postman y seleccionar el entorno **API Catálogo - Entorno Local**.
-- Ejecutar el Collection Runner o las peticiones clave:
-  1. **Flujo exitoso:** Registro y login de Usuario A, Usuario B y Administrador.
-  2. **Errores de validación:** Registro con campos vacíos (`400`) y creación de producto con precio 0 (`422`).
-  3. **Rechazo por permisos:** Intentar crear un producto con el token de Usuario A (`403 Forbidden`) y con token vencido (`401 Unauthorized`).
-  4. **Aislamiento entre usuarios:**
-     - Usuario A agrega el producto 1 a favoritos.
-     - Usuario B consulta sus favoritos: la lista está vacía (`total: 0`).
-     - Usuario B intenta borrar el favorito del producto 1: recibe `404 Not Found`.
-     - Usuario A vuelve a consultar y su favorito sigue existiendo intacto.
-  5. **Persistencia tras reinicio:** Reiniciar la consola de Node.js (`Ctrl+C` y `npm start`) y volver a consultar `GET /api/productos` para evidenciar que los datos continúan presentes.
-
-### Bloque 5: Dificultad Encontrada, Solución y Conclusiones (12:30 - 14:30)
-- **Dificultad:** Manejo de la concurrencia y restricciones de aislamiento al evitar que un usuario manipule favoritos ajenos, así como el aseguramiento de la integridad referencial cuando un producto con favoritos es eliminado.
-- **Solución:** Se implementó una clave compuesta `UNIQUE (usuario_id, producto_id)` con `ON DELETE CASCADE` en la base de datos, y en la capa de aplicación se forzó la lectura del ID desde el token JWT verificado en lugar de aceptar parámetros externos manipulables por el cliente.
-- **Ejecución desde el repositorio:** Demostrar brevemente que clonando el repositorio, configurando `.env` y ejecutando `npm install`, `npm run db:init` y `npm start`, el proyecto levanta de manera inmediata y reproducible.
-
----
-
-## 5. Conclusión y Checklist de Entrega
-
-- [x] Repositorio público de GitHub con historial de commits identificables de ambos integrantes.
-- [x] Variables de entorno sin credenciales reales en `.env.example`.
-- [x] Esquema DDL en PostgreSQL y script de inicialización idempotente (`database/init-db.js`).
-- [x] Autenticación JWT y control de acceso RBAC implementados y verificados.
-- [x] Colección y entorno de Postman con aserciones automatizadas de códigos HTTP y respuestas.
-- [x] Suite de pruebas automatizadas en Node.js (`npm test`) pasando al 100% (29/29).
-- [x] Aislamiento de favoritos entre usuarios y persistencia ante reinicio demostrados.
-- [x] Archivo PDF de entrega idéntico para ambos integrantes (`Entrega_Catalogo_Zavala_Catana.pdf`).
